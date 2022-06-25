@@ -1,0 +1,13 @@
+
+spring:
+  application:
+    name: movement-client
+  cloud:
+    config:
+      uri: http://localhost:8888
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/movement
+management:
+  security:
+    enable: false
