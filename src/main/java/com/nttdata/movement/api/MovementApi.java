@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/movements")
+@RequestMapping("movements")
 public class MovementApi {
 
     @Autowired
@@ -41,6 +41,7 @@ public class MovementApi {
     @PostMapping
     public Mono<MovementResponse> createMovement(@Valid @RequestBody CreateMovementRequest createMovementRequest) {
         Movement movement = movementMapper.toMovement(createMovementRequest);
+        System.out.println("paso por el controlador...");
         return movementService.saveMovement(movement).map(movementMapper::toMovementResponse);
     }
 
