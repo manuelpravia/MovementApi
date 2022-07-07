@@ -38,14 +38,19 @@ public class MovementServiceImpl implements MovementService{
 
     @Override
     public Mono<Movement> saveMovement(Movement movement) {
-        System.out.println("ID de la cienta: " +movement.getIdAccount());
-        Account account = accountClient.getAccount(movement.getIdAccount());
-       System.out.println("Maximo movimiento"+account.getMaxMovement());
-        //System.out.println("id de accouent"+ account.getId());
-      //  account.setAvailableBalance(account.getAvailableBalance().subtract(movement.getAmount()));
-        //accountClient.updateAccount();
-        return null;
-        //return movementRepository.save(movement);
+        accountClient.getAccount(movement.getIdAccount()).flatMap(account -> {
+            System.out.println("la cuenta tiene por id:"+account.getId() +"y monto: "+ account.getAvailableBalance());
+            AccountRequest accountRequest = new AccountRequest();
+            accountRequest.setNumAccount(account.getNumAccount());
+            accountRequest.setMaintenance(account.getMaintenance());
+            accountRequest.setMaxMovement(account.getMaxMovement());
+            accountRequest.setType(account.getType());
+            accountRequest.setAvailableBalance(account.getAvailableBalance().subtract(BigDecimal.valueOf(1000)));
+            accountRequest.setCustomers(account.getCustomers());
+            System.out.println("El saldo que queda en la cuenta: "+account.getMaxMovement());
+            return  accountClient.updateAccount(account.getId(),accountRequest);
+        }).subscribe();
+        return movementRepository.save(movement);
     }
 
     @Override

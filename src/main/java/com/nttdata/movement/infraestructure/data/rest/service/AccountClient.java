@@ -1,18 +1,36 @@
 package com.nttdata.movement.infraestructure.data.rest.service;
 
+
 import com.nttdata.movement.infraestructure.data.rest.entity.Account;
 import com.nttdata.movement.infraestructure.data.rest.entity.AccountRequest;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Mono;
 
 
-@FeignClient(name = "account-client",url = "http://localhost:8082")
-public interface AccountClient {
+@Component
+public class AccountClient {
 
-    @GetMapping("/accounts/{id}")
-    Account getAccount(@PathVariable("id") String id);
+ private final WebClient webClient;
 
-    @PutMapping("/accounts/{id}")
-     Account updateAccount(@PathVariable("id") String id,@RequestBody AccountRequest accountRequest);
+ public AccountClient(@Qualifier("accountApiWebClient") WebClient webClient){
+     this.webClient = webClient;
+ }
+
+ public Mono<Account> getAccount(String id){
+     return webClient.get()
+             .uri(uriBuilder -> uriBuilder.path("/accounts/{id}").build(id))
+             .retrieve()
+             .bodyToMono(Account.class);
+ }
+    public Mono<Account> updateAccount(String id, AccountRequest accountRequest){
+        return webClient.put()
+                .uri(uriBuilder -> uriBuilder.path("/accounts/{id}").build(id))
+                .body(Mono.just(accountRequest),AccountRequest.class)
+                .retrieve()
+                .bodyToMono(Account.class);
+    }
+
 }
